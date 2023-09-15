@@ -26,7 +26,22 @@
             height: 70%;
             resize: none;
             border-radius: 10px;
-            padding: 10px;
+            padding: 5px;
+            background-color: #ffffff;
+            color: #18232A;
+            font-weight: bold;
+            outline: none;
+            border: none;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            font-family: sans-serif;
+        }
+
+        #nickEntry {
+            width: 75%;
+            height: 5%;
+            resize: none;
+            border-radius: 10px;
+            padding: 5px;
             background-color: #ffffff;
             color: #18232A;
             font-weight: bold;
@@ -79,7 +94,9 @@
     <div class="container">
         <div id="charCount">0/100</div>
         <br>
-        <textarea id="textEntry" maxlength="100" placeholder="여기에 메시지 입력"></textarea>
+        <textarea id="nickEntry" maxlength="15" placeholder="닉네임"></textarea>
+        <br>
+        <textarea id="textEntry" maxlength="100" placeholder="메시지"></textarea>
         <br>
         <button id="sendButton">보내기</button>
     </div>
@@ -129,6 +146,10 @@
         document.getElementById("sendButton").addEventListener("click", function() {
             // Get the text from the textarea
             let text = document.getElementById("textEntry").value;
+            let nick = document.getElementById("nickEntry").value;
+            if (nick === "") {
+                nick = "익명"
+            }
 
             // Detect the client's IPv4 address
             fetch('https://api64.ipify.org?format=json')
@@ -142,6 +163,7 @@
                         timestamp: new Date().toString(),
                         ip: clientIpAddress,
                         device: clientDevice,
+                        nickname: nick
                     };
 
                     // Send the data to Firebase under a unique key
@@ -166,7 +188,5 @@
                 });
         });
     </script>
-    
-    
 </body>
 </html>
