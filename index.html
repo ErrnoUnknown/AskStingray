@@ -145,17 +145,21 @@
                     };
 
                     // Send the data to Firebase under a unique key
-                    let key = database.ref().push().key;
-                    database.ref('messages/' + key).set(resultdata, function(error) {
-                        if (error) {
-                            console.error("Data could not be saved: " + error);
-                            document.getElementById("textEntry").value = "";
-                        } else {
-                            console.log("Data saved successfully.");
-                            document.getElementById("textEntry").placeholder = "메시지가 전송되었습니다.";
-                            document.getElementById("textEntry").value = "";
-                        }
-                    });
+                    if (resultdata.text !== "") {
+                        let key = database.ref().push().key;
+                        database.ref('messages/' + key).set(resultdata, function(error) {
+                            if (error) {
+                                console.error("Data could not be saved: " + error);
+                                document.getElementById("textEntry").value = "";
+                            } else {
+                                console.log("Data saved successfully.");
+                                document.getElementById("textEntry").placeholder = "메시지가 전송되었습니다.";
+                                document.getElementById("textEntry").value = "";
+                            }
+                        });
+                    } else {
+                        document.getElementById("textEntry").placeholder = "메시지를 입력해주세요.";
+                    }
                 })
                 .catch(error => {
                     console.error('Error detecting client information:', error);
