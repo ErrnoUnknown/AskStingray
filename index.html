@@ -18,7 +18,7 @@
             justify-content: center;
             height: 100%;
             background: linear-gradient(to bottom, #43c0ba, #3cbda1);
-            background-size: 150% 150%; /* Make the gradient cover the entire container */
+            background-size: 150% 200%; /* Make the gradient cover the entire container */
         }
 
         #textEntry {
@@ -27,7 +27,8 @@
             resize: none;
             border-radius: 10px;
             padding: 10px;
-            color: linear-gradient(to bottom, #DEF2F1, #ffffff);
+            background-color: #ffffff;
+            color: #18232A;
             font-weight: bold;
             outline: none;
             border: none;
@@ -40,21 +41,70 @@
             height: 5%;
             margin-top: 10px;
             border-radius: 10px;
-            background-color: linear-gradient(to bottom, #DEF2F1, #ffffff);
+            background-color: #ffffff;
             color: #18232A;
             font-weight: bold;
             outline: none;
             border: none;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             font-family: sans-serif;
+            padding: 10px; /* Add padding for better spacing */
+        }
+
+        #charCount {
+            width: 75%;
+            height: auto; /* Adjust height as needed */
+            margin-top: 10px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            color: #18232A;
+            font-weight: bold;
+            outline: none;
+            border: none;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            font-family: sans-serif;
+            text-align: center; /* Center the text horizontally */
+            padding: 10px; /* Add padding for better spacing */
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+
+        #charCount.max {
+            background-color: red; /* Change background color to red when the character limit is reached */
+            color: white; /* Change text color to white when the character limit is reached */
         }
     </style>
 </head>
 <body>
+    
     <div class="container">
+        <div id="charCount">0/100</div>
+        <br>
         <textarea id="textEntry" maxlength="100" placeholder="여기에 메시지 입력"></textarea>
+        <br>
         <button id="sendButton">보내기</button>
     </div>
+
+    <script>
+        // Add an event listener to the textarea for input events
+        document.getElementById("textEntry").addEventListener("input", function() {
+        // Get the current text in the textarea
+        let text = this.value;
+        
+        // Update the character count element
+        let charCountElement = document.getElementById("charCount");
+        charCountElement.textContent = text.length + "/100";
+        
+        // Check if the character limit is reached
+        if (text.length > 100) {
+            // Trim the text to 100 characters
+            this.value = text.slice(0, 100);
+            charCountElement.textContent = "100/100";
+            charCountElement.classList.add("max"); // Add the "max" class for styling
+        } else {
+            charCountElement.classList.remove("max"); // Remove the "max" class if not reached
+        }
+    });
+    </script>
 
     <!-- Firebase Configuration -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -76,28 +126,40 @@
         // Get a reference to the Firebase Realtime Database
         const database = firebase.database();
 
-        // Add an event listener to the button to send data to Firebase when clicked
         document.getElementById("sendButton").addEventListener("click", function() {
             // Get the text from the textarea
             let text = document.getElementById("textEntry").value;
 
-            // Define a unique key for the data (you can use Firebase's push method for this)
-            let key = database.ref().push().key;
+            // Detect the client's IPv4 address
+            fetch('https://api64.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    let clientIpAddress = data.ip;
+                    let clientDevice = navigator.userAgent;
 
-            // Construct the data object
-            let data = {
-                text: text,
-                timestamp: new Date().toString()
-            };
+                    let resultdata = {
+                        text: text,
+                        timestamp: new Date().toString(),
+                        ip: clientIpAddress,
+                        device: clientDevice,
+                    };
 
-            // Send the data to Firebase under a unique key
-            database.ref('messages/' + key).set(data, function(error) {
-                if (error) {
-                    console.error("Data could not be saved: " + error);
-                } else {
-                    console.log("Data saved successfully.");
-                }
-            });
+                    // Send the data to Firebase under a unique key
+                    let key = database.ref().push().key;
+                    database.ref('messages/' + key).set(resultdata, function(error) {
+                        if (error) {
+                            console.error("Data could not be saved: " + error);
+                            document.getElementById("textEntry").value = "";
+                        } else {
+                            console.log("Data saved successfully.");
+                            document.getElementById("textEntry").placeholder = "메시지가 전송되었습니다.";
+                            document.getElementById("textEntry").value = "";
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error detecting client information:', error);
+                });
         });
     </script>
     
