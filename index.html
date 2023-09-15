@@ -54,14 +54,48 @@
         <button id="sendButton">보내기</button>
     </div>
 
-    <script src="/static/send.js"></script> <!-- Include the JavaScript file -->
+    <!-- Firebase Configuration -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        // Add an event listener to the button to run the JavaScript file when clicked
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-sgVMze5rGmSbN3A_gJT7OUQokGuKDbE",
+            authDomain: "askstingray.firebaseapp.com",
+            projectId: "askstingray",
+            storageBucket: "askstingray.appspot.com",
+            messagingSenderId: "205696173012",
+            appId: "1:205696173012:web:73e094a7a17db5f5e68c41",
+            measurementId: "G-NZSH2PPZS1"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get a reference to the Firebase Realtime Database
+        const database = firebase.database();
+
+        // Add an event listener to the button to send data to Firebase when clicked
         document.getElementById("sendButton").addEventListener("click", function() {
-            // Load and execute the JavaScript file
-            var script = document.createElement("script");
-            script.src = "/static/send.js";
-            document.body.appendChild(script);
+            // Get the text from the textarea
+            let text = document.getElementById("textEntry").value;
+
+            // Define a unique key for the data (you can use Firebase's push method for this)
+            let key = database.ref().push().key;
+
+            // Construct the data object
+            let data = {
+                text: text,
+                timestamp: new Date().toString()
+            };
+
+            // Send the data to Firebase under a unique key
+            database.ref('messages/' + key).set(data, function(error) {
+                if (error) {
+                    console.error("Data could not be saved: " + error);
+                } else {
+                    console.log("Data saved successfully.");
+                }
+            });
         });
     </script>
 </body>
