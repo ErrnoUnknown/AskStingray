@@ -32,7 +32,6 @@
             outline: none;
             border: none;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            color: #18232A;
         }
 
         #sendButton {
@@ -46,7 +45,6 @@
             outline: none;
             border: none;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            color: #18232A;
         }
     </style>
 </head>
@@ -55,5 +53,16 @@
         <textarea id="textEntry" maxlength="100" placeholder="여기에 메시지 입력"></textarea>
         <button id="sendButton">보내기</button>
     </div>
+
+    <script src="/static/send.js"></script> <!-- Include the JavaScript file -->
+    <script>
+        // Add an event listener to the button to run the JavaScript file when clicked
+        document.getElementById("sendButton").addEventListener("click", function() {
+            // Load and execute the JavaScript file
+            var script = document.createElement("script");
+            script.src = "/static/send.js";
+            document.body.appendChild(script);
+        });
+    </script>
 </body>
 </html>
