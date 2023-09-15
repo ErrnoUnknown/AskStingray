@@ -46,21 +46,56 @@
             border: none;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
+
+        #phoneInputContainer {
+            display: none; /* Initially hidden for authenticated users */
+            align-items: center;
+            justify-content: center;
+        }
+
+        #phoneNumber {
+            width: 75%;
+            margin-top: 10px;
+            border-radius: 10px;
+            padding: 10px;
+            outline: none;
+            border: none;
+        }
+
+        #verifyButton {
+            width: 75%;
+            margin-top: 10px;
+            border-radius: 10px;
+            background-color: linear-gradient(to bottom, #DEF2F1, #ffffff);
+            color: #18232A;
+            font-weight: bold;
+            outline: none;
+            border: none;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <textarea id="textEntry" maxlength="100" placeholder="여기에 메시지 입력"></textarea>
         <button id="sendButton">보내기</button>
+
+        <!-- Phone Number Input and Verify Button -->
+        <div id="phoneInputContainer">
+            <input type="tel" id="phoneNumber" placeholder="Enter your phone number">
+            <button id="verifyButton" onclick="sendVerificationCode()">Send Verification Code</button>
+        </div>
     </div>
 
     <!-- Firebase Configuration -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD-sgVMze5rGmSbN3A_gJT7OUQokGuKDbE",
             authDomain: "askstingray.firebaseapp.com",
+            databaseURL: "https://askstingray-default-rtdb.firebaseio.com",
             projectId: "askstingray",
             storageBucket: "askstingray.appspot.com",
             messagingSenderId: "205696173012",
@@ -73,6 +108,44 @@
 
         // Get a reference to the Firebase Realtime Database
         const database = firebase.database();
+
+        // Check the user's authentication state
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                // User is signed in
+                console.log("User is signed in:", user);
+
+                // Hide the phone input and verify button for authenticated users
+                document.getElementById("phoneInputContainer").style.display = "none";
+            } else {
+                // User is signed out
+                console.log("User is signed out");
+
+                // Show the phone input and verify button for non-authenticated users
+                document.getElementById("phoneInputContainer").style.display = "flex";
+            }
+        });
+
+        // Function to send a verification code to the provided phone number
+        function sendVerificationCode() {
+            let phoneNumber = document.getElementById("phoneNumber").value;
+            let appVerifier = new firebase.auth.RecaptchaVerifier('phoneInputContainer');
+
+            firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+                .then(function (confirmationResult) {
+                    // SMS verification sent successfully
+                    let verificationCode = prompt("Enter the verification code sent to your phone:");
+                    return confirmationResult.confirm(verificationCode);
+                })
+                .then(function (result) {
+                    // Phone number verified successfully
+                    let user = result.user;
+                    console.log("Phone number verified:", user);
+                })
+                .catch(function (error) {
+                    console.error("Error:", error.message);
+                });
+        }
 
         // Add an event listener to the button to send data to Firebase when clicked
         document.getElementById("sendButton").addEventListener("click", function() {
